@@ -8,7 +8,7 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
-# Build stage
+// Build stage
 stage('Build') {
     node {
         checkout scm
@@ -18,7 +18,7 @@ stage('Build') {
     }
 }
 
-# Deploy stage
+// Deploy stage
 if (branch_deployment_environment) {
     stage('Deploy') {
         if (branch_deployment_environment == "prod") {
@@ -34,7 +34,7 @@ if (branch_deployment_environment) {
     }
 }
 
-# Verify stage
+// Verify stage
 if (branch_deployment_environment && branch_deployment_environment != "prod") {
     stage('Verify deployment') {
         node {
@@ -44,6 +44,7 @@ if (branch_deployment_environment && branch_deployment_environment != "prod") {
     }
 }
 
+// Start release
 if (branch_type == "dev") {
     stage('Promote build to UAT') {
         timeout(time: 1, unit: 'HOURS') {
@@ -55,6 +56,7 @@ if (branch_type == "dev") {
     }
 }
 
+// Finish release
 if (branch_type == "release") {
     stage('Promote build to PRD') {
         timeout(time: 1, unit: 'HOURS') {
@@ -66,6 +68,7 @@ if (branch_type == "release") {
     }
 }
 
+// Hotfix
 if (branch_type == "hotfix") {
     stage('finish hotfix') {
         timeout(time: 1, unit: 'HOURS') {
