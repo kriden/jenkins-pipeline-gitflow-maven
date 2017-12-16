@@ -11,7 +11,7 @@ def branch_deployment_environment = get_branch_deployment_environment branch_typ
 
 stage('configure') {
   withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-    echo 'Source control credentials: $USERNAME $PASSWORD'
+    echo "Source control credentials: $USERNAME $PASSWORD"
   }
 }
 
@@ -60,7 +60,7 @@ if (branch_type == "dev") {
         }
         node {
             withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                startRelease(USERNAME, PASSWORD);
+            startRelease("$USERNAME", "$PASSWORD");
             }
         }
     }
