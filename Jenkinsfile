@@ -13,7 +13,7 @@ def branch_deployment_environment = get_branch_deployment_environment branch_typ
 // Build stage
 stage('Build') {
     node {
-        wsCleanup()
+        wsCleanup cleanWhenFailure: false
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
