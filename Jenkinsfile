@@ -5,38 +5,26 @@ def testAemCredentialsId = 'project-aem-credentials'
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
-
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
-stage('configure') {
-  withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-    echo "Source control credentials: $USERNAME $PASSWORD"
-  }
-}
-
-stage('build') {
+stage('Build') {
     node {
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-        mvn "clean verify"
-    }
-}
-
-stage('build docker image') {
-    node {
-        mvn "clean package -DskipTests"
+        mvn "clean install"
     }
 }
 
 if (branch_deployment_environment) {
-    stage('deploy') {
+    stage('Deploy') {
         if (branch_deployment_environment == "prod") {
             timeout(time: 1, unit: 'DAYS') {
                 input "Deploy to ${branch_deployment_environment} ?"
             }
         }
+
         node {
             sh "echo Deploying to ${branch_deployment_environment}"
             //TODO specify the deployment
@@ -44,7 +32,7 @@ if (branch_deployment_environment) {
     }
 
     if (branch_deployment_environment != "prod") {
-        stage('integration tests') {
+        stage('Verify deployment') {
             node {
                 sh "echo Running integration tests in ${branch_deployment_environment}"
                 //TODO do the actual tests
@@ -54,7 +42,7 @@ if (branch_deployment_environment) {
 }
 
 if (branch_type == "dev") {
-    stage('start release') {
+    stage('Promote build to UAT') {
         timeout(time: 1, unit: 'HOURS') {
             input "Do you want to start a release?"
         }
@@ -65,14 +53,12 @@ if (branch_type == "dev") {
 }
 
 if (branch_type == "release") {
-    stage('finish release') {
+    stage('Promote build to PRD') {
         timeout(time: 1, unit: 'HOURS') {
             input "Is the release finished?"
         }
         node {
-            sshagent(['f1ad0f5d-df0d-441a-bea0-fd2c34801427']) {
-                mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
-            }
+            finishRelease(scmCredentialsId)
         }
     }
 }
@@ -125,9 +111,17 @@ def get_branch_deployment_environment(String branch_type) {
     }
 }
 
-def startRelease(String credentialId) {
-  withCredentials([usernamePassword(credentialsId: credentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-    mvn("jgitflow:release-start -DpushReleases=true -Dusername=${USERNAME} -Dpassword=${PASSWORD}")
+def startRelease(String credentials) {
+  jgitFlow("release-start", credentials)
+}
+
+def finishRelease(String credentials) {
+  jgitFlow("release-finish", credentials)
+}
+
+def jgitFlow(String command, String credentials) {
+  withCredentials([usernamePassword(credentialsId: credentials, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+    mvn("jgitflow:${command} -DpushReleases=true -Dusername=${USERNAME} -Dpassword=${PASSWORD}")
   }
 }
 
