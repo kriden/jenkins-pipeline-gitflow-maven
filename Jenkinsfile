@@ -53,8 +53,8 @@ if (branch_type == "dev") {
             input "Do you want to start a release?"
         }
         node {
-        withCredentials([usernamePassword(credentialsId: $scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                startRelease($USERNAME, $PASSWORD);
+        withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                startRelease(USERNAME, PASSWORD);
             }
         }
     }
