@@ -8,6 +8,7 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
+# Build stage
 stage('Build') {
     node {
         checkout scm
@@ -17,6 +18,7 @@ stage('Build') {
     }
 }
 
+# Deploy stage
 if (branch_deployment_environment) {
     stage('Deploy') {
         if (branch_deployment_environment == "prod") {
@@ -30,13 +32,14 @@ if (branch_deployment_environment) {
             //TODO specify the deployment
         }
     }
+}
 
-    if (branch_deployment_environment != "prod") {
-        stage('Verify deployment') {
-            node {
-                sh "echo Running integration tests in ${branch_deployment_environment}"
-                //TODO do the actual tests
-            }
+# Verify stage
+if (branch_deployment_environment && branch_deployment_environment != "prod") {
+    stage('Verify deployment') {
+        node {
+            sh "echo Running integration tests in ${branch_deployment_environment}"
+            //TODO do the actual tests
         }
     }
 }
