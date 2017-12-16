@@ -126,7 +126,7 @@ def get_branch_deployment_environment(String branch_type) {
 }
 
 def startRelease(String credentialId) {
-  withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+  withCredentials([usernamePassword(credentialsId: credentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
     sh "mvn -B jgtiflow:release-start -DpushReleases=true -Dusername=${username} -Dpassword=${password}"
   }
 }
