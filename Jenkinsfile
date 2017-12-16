@@ -9,6 +9,12 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
+stage('configure') {
+  withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+    echo 'Source control credentials: $USERNAME $PASSWORD'
+  }
+}
+
 stage('build') {
     node {
         checkout scm
@@ -53,7 +59,7 @@ if (branch_type == "dev") {
             input "Do you want to start a release?"
         }
         node {
-        withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+            withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                 startRelease(USERNAME, PASSWORD);
             }
         }
