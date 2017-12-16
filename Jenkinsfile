@@ -1,6 +1,13 @@
 #!groovy​
 
+def scmCredentialsId = 'project-github-credentials'
+def testAemCredentialsId = 'project-aem-credentials'
+
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
+
+
+def branch_type = get_branch_type "${env.BRANCH_NAME}"
+def branch_deployment_environment = get_branch_deployment_environment branch_type
 
 stage('build') {
     node {
@@ -16,9 +23,6 @@ stage('build docker image') {
         mvn "clean package -DskipTests"
     }
 }
-
-def branch_type = get_branch_type "${env.BRANCH_NAME}"
-def branch_deployment_environment = get_branch_deployment_environment branch_type
 
 if (branch_deployment_environment) {
     stage('deploy') {
@@ -49,8 +53,8 @@ if (branch_type == "dev") {
             input "Do you want to start a release?"
         }
         node {
-            sshagent(['f1ad0f5d-df0d-441a-bea0-fd2c34801427']) {
-                mvn("jgitflow:release-start")
+        withCredentials([usernamePassword(credentialsId: $scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                startRelease($USERNAME, $PASSWORD);
             }
         }
     }
@@ -115,6 +119,10 @@ def get_branch_deployment_environment(String branch_type) {
     } else {
         return null;
     }
+}
+
+def startRelease(String username, String password) {
+  sh 'mvn -B jgtiflow:release-start -DpushReleases=true -Dusername=$username -Dpassword=$password'
 }
 
 def mvn(String goals) {
