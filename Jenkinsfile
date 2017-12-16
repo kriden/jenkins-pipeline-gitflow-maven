@@ -59,9 +59,7 @@ if (branch_type == "dev") {
             input "Do you want to start a release?"
         }
         node {
-            withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-            startRelease("$USERNAME", "$PASSWORD");
-            }
+            startRelease(scmCredentialsId);
         }
     }
 }
@@ -127,8 +125,10 @@ def get_branch_deployment_environment(String branch_type) {
     }
 }
 
-def startRelease(String username, String password) {
-  sh 'mvn -B jgtiflow:release-start -DpushReleases=true -Dusername=$username -Dpassword=$password'
+def startRelease(String credentialId) {
+  withCredentials([usernamePassword(credentialsId: scmCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+    sh "mvn -B jgtiflow:release-start -DpushReleases=true -Dusername=${username} -Dpassword=${password}"
+  }
 }
 
 def mvn(String goals) {
