@@ -8,9 +8,12 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
+// Cleanup workspace
+
 // Build stage
 stage('Build') {
     node {
+        wsCleanup()
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
