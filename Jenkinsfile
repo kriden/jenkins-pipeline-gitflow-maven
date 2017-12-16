@@ -127,7 +127,7 @@ def get_branch_deployment_environment(String branch_type) {
 
 def startRelease(String credentialId) {
   withCredentials([usernamePassword(credentialsId: credentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-    sh "mvn -B jgitflow:release-start -DpushReleases=true -Dusername=${username} -Dpassword=${password}"
+    mvn("jgitflow:release-start -DpushReleases=true -Dusername=${USERNAME} -Dpassword=${PASSWORD}")
   }
 }
 
