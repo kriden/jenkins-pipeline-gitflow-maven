@@ -2,27 +2,29 @@
 
 def settings = [
   scmCredentials: 'project-github',
-  environments: [
-    // Test environment
-    test: [
-      [
-        label: "Author",
-        credentials: 'project-test-author',
-        url: "http://localhost:4502"
-      ],
-      [
-        label: "Publish",
-        credentials: 'project-test-publish1',
-        url: "http://localhost:4503"
-      ],
-      [
-        label: "Publish2",
-        credentials: 'project-test-publish2',
-        url: "http://localhost:4504"
-      ]
+  environments: []
+]
+
+settings.environments.put(test, [
+  branches: '.*development',
+  instances: [
+    [
+      label: "Author",
+      credentials: 'project-test-author',
+      url: "http://localhost:4502"
+    ],
+    [
+      label: "Publish",
+      credentials: 'project-test-publish1',
+      url: "http://localhost:4503"
+    ],
+    [
+      label: "Publish2",
+      credentials: 'project-test-publish2',
+      url: "http://localhost:4504"
     ]
   ]
-]
+])
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
@@ -41,6 +43,8 @@ stage('Build') {
 
 // Deploy stage
 if (branch_deployment_environment) {
+    def buildEnvironment = settings.environments[branch_deployment_environment];
+
     stage('Deploy') {
         if (branch_deployment_environment == "prod") {
             timeout(time: 1, unit: 'DAYS') {
