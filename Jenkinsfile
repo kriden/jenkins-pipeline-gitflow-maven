@@ -1,7 +1,7 @@
 #!groovy​
 def settings = [
   scmCredentials: 'project-github',
-  environments: []
+  environments: new HashMap()
 ]
 
 settings.environments.put("test", [
