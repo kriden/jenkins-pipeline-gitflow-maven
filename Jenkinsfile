@@ -1,30 +1,30 @@
 #!groovy​
 def settings = [
   scmCredentials: 'project-github',
-  environments: new HashMap()
-]
-
-settings.environments.put("test", [
-  branches: '.*development',
-  instances: [
-    [
-      label: "Author",
-      credentials: 'project-test-author',
-      url: "http://localhost:4502"
-    ],
-    [
-      label: "Publish",
-      credentials: 'project-test-publish1',
-      url: "http://localhost:4503"
-    ],
-    [
-      label: "Publish2",
-      credentials: 'project-test-publish2',
-      url: "http://localhost:4504"
+  environments: [
+    test: [
+      branches: '.*development',
+      instances: [
+        [
+          label: "Author",
+          credentials: 'project-test-author',
+          url: "http://localhost:4502"
+        ],
+        [
+          label: "Publish",
+          credentials: 'project-test-publish1',
+          url: "http://localhost:4503"
+        ],
+        [
+          label: "Publish2",
+          credentials: 'project-test-publish2',
+          url: "http://localhost:4504"
+        ]
+        // UAT Environment
+      ]
     ]
-    // UAT Environment
   ]
-])
+]
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
