@@ -2,7 +2,7 @@
 def settings = [
   scmCredentials: 'project-github',
   environments: [
-    test: [
+    dev: [
       branches: '.*development',
       instances: [
         [
@@ -51,7 +51,7 @@ if (branch_deployment_environment) {
           builds[instance.label] = {
             node {
               stage("Deploying to ${instance.label}") {
-                sh "Echo deploying to ${instance.label}, ${instance.url} with credentials ${instance.credentials}"
+                sh "echo deploying to ${instance.label}, ${instance.url} with credentials ${instance.credentials}"
               }
             }
           }
