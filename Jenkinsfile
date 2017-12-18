@@ -2,7 +2,7 @@
 def settings = [
   scmCredentials: 'project-github',
   environments: [
-    test: [
+    dev: [
       branches: '.*development',
       instances: [
         [
