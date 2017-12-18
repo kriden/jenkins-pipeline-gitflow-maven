@@ -2,6 +2,7 @@
 
 def settings = [
   scmCredentials: 'project-github',
+<<<<<<< HEAD
   environments: []
 ]
 
@@ -22,7 +23,31 @@ settings.environments.put(test, [
       label: "Publish2",
       credentials: 'project-test-publish2',
       url: "http://localhost:4504"
+=======
+  environments: [
+    // Test environment
+    test: [
+      branches: '.*development'
+      instances: [
+        [
+          label: "Author",
+          credentials: 'project-test-author',
+          url: "http://localhost:4502"
+        ],
+        [
+          label: "Publish",
+          credentials: 'project-test-publish1',
+          url: "http://localhost:4503"
+        ],
+        [
+          label: "Publish2",
+          credentials: 'project-test-publish2',
+          url: "http://localhost:4504"
+        ]
+      ]
+>>>>>>> 8d6f24e89dccb9da7bc41fb8135eb66d478f89de
     ]
+    // UAT Environment
   ]
 ])
 
