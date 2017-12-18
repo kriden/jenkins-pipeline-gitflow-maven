@@ -5,22 +5,26 @@ def settings = [
   environments: [
     // Test environment
     test: [
-      [
-        label: "Author",
-        credentials: 'project-test-author',
-        url: "http://localhost:4502"
-      ],
-      [
-        label: "Publish",
-        credentials: 'project-test-publish1',
-        url: "http://localhost:4503"
-      ],
-      [
-        label: "Publish2",
-        credentials: 'project-test-publish2',
-        url: "http://localhost:4504"
+      branches: '.*development'
+      instances: [
+        [
+          label: "Author",
+          credentials: 'project-test-author',
+          url: "http://localhost:4502"
+        ],
+        [
+          label: "Publish",
+          credentials: 'project-test-publish1',
+          url: "http://localhost:4503"
+        ],
+        [
+          label: "Publish2",
+          credentials: 'project-test-publish2',
+          url: "http://localhost:4504"
+        ]
       ]
     ]
+    // UAT Environment
   ]
 ]
 
@@ -41,6 +45,8 @@ stage('Build') {
 
 // Deploy stage
 if (branch_deployment_environment) {
+    def buildEnvironment = settings.environments[branch_deployment_environment];
+
     stage('Deploy') {
         if (branch_deployment_environment == "prod") {
             timeout(time: 1, unit: 'DAYS') {
