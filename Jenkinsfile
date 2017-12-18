@@ -1,19 +1,37 @@
 #!groovy​
 
-def scmCredentialsId = 'project-github-credentials'
-def testAemCredentialsId = 'project-aem-credentials'
+def settings = [
+  scmCredentials: 'project-github',
+  environments: [
+    // Test environment
+    test: [
+      [
+        label: "Author",
+        credentials: 'project-test-author',
+        url: "http://localhost:4502"
+      ],
+      [
+        label: "Publish",
+        credentials: 'project-test-publish1',
+        url: "http://localhost:4503"
+      ],
+      [
+        label: "Publish2",
+        credentials: 'project-test-publish2',
+        url: "http://localhost:4504"
+      ]
+    ]
+  ]
+]
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
-// Cleanup workspace
-
 // Build stage
 stage('Build') {
     node {
-        wsCleanup cleanWhenFailure: false
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
@@ -54,7 +72,7 @@ if (branch_type == "dev") {
             input "Do you want to start a release?"
         }
         node {
-            startRelease(scmCredentialsId);
+            startRelease(settings.scmCredentials);
         }
     }
 }
@@ -66,7 +84,7 @@ if (branch_type == "release") {
             input "Is the release finished?"
         }
         node {
-            finishRelease(scmCredentialsId)
+            finishRelease(settings.scmCredentials)
         }
     }
 }
@@ -78,9 +96,7 @@ if (branch_type == "hotfix") {
             input "Is the hotfix finished?"
         }
         node {
-            sshagent(['f1ad0f5d-df0d-441a-bea0-fd2c34801427']) {
-                mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
-            }
+            finishHotfix(settings.scmCredentials)
         }
     }
 }
@@ -128,9 +144,13 @@ def finishRelease(String credentials) {
   jgitFlow("release-finish", credentials)
 }
 
+def finishHotfix(String credentials) {
+  jgitFlow("hotfix-finish", credentials)
+}
+
 def jgitFlow(String command, String credentials) {
   withCredentials([usernamePassword(credentialsId: credentials, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-    mvn("jgitflow:${command} -DpushReleases=true -Dusername=${USERNAME} -Dpassword=${PASSWORD}")
+    mvn("jgitflow:${command} -DpushReleases=true -DpushHotfixes=true -Dusername=${USERNAME} -Dpassword=${PASSWORD}")
   }
 }
 
