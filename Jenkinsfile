@@ -4,7 +4,7 @@ def settings = [
   environments: []
 ]
 
-settings.environments.put(test, [
+settings.environments.put("test", [
   branches: '.*development',
   instances: [
     [
