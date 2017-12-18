@@ -46,16 +46,17 @@ if (branch_deployment_environment) {
     def buildEnvironment = settings.environments[branch_deployment_environment];
 
     stage('Deploy') {
-        if (branch_deployment_environment == "prod") {
-            timeout(time: 1, unit: 'DAYS') {
-                input "Deploy to ${branch_deployment_environment} ?"
+        def builds = [:]
+        for(instance in buildEnvironment.instances) {
+          builds[instance.label] = {
+            node {
+              stage("Deploying to ${instance.label}") {
+                sh "Echo deploying to ${instance.label}, ${instance.url} with credentials ${instance.credentials}"
+              }
             }
+          }
         }
-
-        node {
-            sh "echo Deploying to ${branch_deployment_environment}"
-            //TODO specify the deployment
-        }
+        parallel builds
     }
 }
 
