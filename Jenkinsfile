@@ -51,7 +51,7 @@ if (branch_deployment_environment) {
           builds[instance.label] = {
             node {
               stage("Deploying to ${instance.label}") {
-                sh "echo deploying to ${instance.label}, ${instance.url} with credentials ${instance.credentials}"
+                echo "deploying to ${instance.label}, ${instance.url} with credentials ${instance.credentials}"
               }
             }
           }
@@ -64,7 +64,7 @@ if (branch_deployment_environment) {
 if (branch_deployment_environment && branch_deployment_environment != "prod") {
     stage('Verify deployment') {
         node {
-            sh "echo Running integration tests in ${branch_deployment_environment}"
+            echo "Running integration tests in ${branch_deployment_environment}"
             //TODO do the actual tests
         }
     }
